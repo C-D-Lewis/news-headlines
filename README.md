@@ -2,6 +2,8 @@
 
 Code for the News Headlines app powered by (but not affiliated with) BBC News.
 
+Open source since December 2016.
+
 
 ## Notes
 
@@ -16,3 +18,8 @@ Code for the News Headlines app powered by (but not affiliated with) BBC News.
 
 * The app also used to support opening a pin to see more details as well as pin
   notifications, but these also went away. Same rules apply.
+
+
+## TODO
+
+* More detailed documentation
