@@ -1,7 +1,7 @@
 var config = require('./config.json');
 
 var DEBUG = false;  // Turn off for release
-var VERSION = '4.4';  // Match package.json
+var VERSION = '4.5';  // Match package.json
 var MAX_ITEMS = 20;   // Max feed items the app will display
 var DATA_SIZE = 1950; // Max AppMessage image chunk size (pre-dates 8k buffers)
 var THUMBNAIL_WIDTH = 144;
@@ -325,7 +325,7 @@ function downloadImage(responseText, titleHash, thisImgSession) {
       }
 
       // Get image data
-      var ip = json.news_headlines;
+      var ip = json.ip;
       var reqUrl = 'http://' + ip + ':5000/convert?url=' + stories[index].url;
       debug('downloadImage(): Requesting image for ' + stories[i].url);
       request(reqUrl, 'GET', function(responseText) {
@@ -477,7 +477,7 @@ function getStatus() {
   // Query boot for IP
   request(config.BOOT_URL, 'GET', function(responseText) {
     var json = JSON.parse(responseText);
-    var ip = json.news_headlines;
+    var ip = json.ip;
 
     // Get status
     request('http://' + ip + ':5000/status', 'GET', function(responseTextStatus) {
