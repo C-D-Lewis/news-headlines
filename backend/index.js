@@ -1,11 +1,16 @@
 var express = require('express');
-var request = require('request');
-var moment = require('moment-timezone');
 // var imagemagick = require('imagemagick-native');
+var moment = require('moment-timezone');
+var request = require('request');
 var timelinejs = require('pebble-timeline-js-node');
+
 var config = require('./config.json');
+var plural = require('./util/plural.js');
 
 /*********************************** Config ***********************************/
+
+// TODO Clean up this config
+// TODO Clean up logging
 
 var DEBUG = true;  // More logging
 var LOG_PINS = true;  // Log pin contents
@@ -195,6 +200,18 @@ function download() {
         // timelineRequest(pinNotif, 'PUT', [TOPIC_HEADLINES_NOTIFS], config.API_KEY_SANDBOX, function(responseText) {
         //   debug('timelineRequest(): Sandbox pin with notif push result: ' + responseText);
         // });
+
+        // Push to Plural
+        request(config.IP_URL, function(err, response, body) {
+          if(err) {
+            console.log('Error getting IP: ' + JSON.stringify(err));
+            return;
+          }
+
+          var ip = JSON.parse(body).ip;
+          var msg = pin.layout.title + ' - ' + pin.layout.body;
+          plural.post(ip, 'news_headlines__latest', msg);
+        });
       }
     }
     debug('Last updated: ' + new Date().toISOString());
@@ -262,8 +279,7 @@ var getPixels = function(png) {
 
 var app = express();
 
-app.set('port', config.PORT);
-app.use(express.static(__dirname + '/public'));
+app.set('port', config.PORTS.THIS);
 
 app.get('/convert', function(req, res) {
   debug('[' + new Date().toString() + '] Convert requested: ' + req.query.url);
