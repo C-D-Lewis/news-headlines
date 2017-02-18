@@ -5,6 +5,7 @@ var request = require('request');
 var timelinejs = require('pebble-timeline-js-node');
 
 var config = require('./config.json');
+var log = require('./util/log.js');
 var plural = require('./util/plural.js');
 
 /*********************************** Config ***********************************/
@@ -12,12 +13,10 @@ var plural = require('./util/plural.js');
 // TODO Clean up this config
 // TODO Clean up logging
 
-var DEBUG = true;  // More logging
 var LOG_PINS = true;  // Log pin contents
 var PUSH_TO_PRODUCTION = true;
 var MAX_PUSHED = 1;  // Max pins pushed each INTERVAL. Prevents infamous timeline blob db errors.
-var INTERVAL_MINS = 240;  // Minutes between update interval
-var INTERVAL = INTERVAL_MINS * 1000 /* seconds */ * 60 /* minutes */;
+var INTERVAL = 240 * 1000 /* seconds */ * 60 /* minutes */;
 var MAX_DUPLICATES = 100;  // Max 'already pushed' stories
 
 var TOPIC_HEADLINES = 'headlines';
@@ -26,13 +25,7 @@ var TOPIC_HEADLINES = 'headlines';
 /************************************* Data ***********************************/
 
 var gDuplicateBuffer = [];  // Check new stories against the last MAX_DUPLICATES to prevent hour-later duplucates
-var gWillCacheFirstData = true;  // Don't post pins right away
-
-/************************************ Util ************************************/
-
-function debug(message) {
-  if(DEBUG) console.log(message);
-}
+var gWillCacheFirstData = true;  // Don't post pins right away - stateful
 
 /******************************** Feed parsing ********************************/
 
@@ -43,7 +36,7 @@ function printBufferSize() {
       counter += 1;
     }
   }
-  debug('printBufferSize(): There are ' + counter + ' items in the duplicate buffer');
+  log.debug('printBufferSize(): There are ' + counter + ' items in the duplicate buffer');
 }
 
 var isDuplicate = function(story) {
@@ -108,7 +101,7 @@ var parseFeed = function(responseText) {
       }
       // Add this
       gDuplicateBuffer[0] = s;
-      debug('Added new story: ' + s.title);
+      log.debug('Added new story: ' + s.title);
 
       items.push(s);
     }
@@ -118,7 +111,7 @@ var parseFeed = function(responseText) {
   }
 
   printBufferSize();
-  debug('parseFeed(): Extracted ' + items.length + ' items.');
+  log.debug('parseFeed(): Extracted ' + items.length + ' items.');
   return items;
 };
 
@@ -126,18 +119,18 @@ var parseFeed = function(responseText) {
 
 function download() {
   request('http://feeds.bbci.co.uk/news/rss.xml', function(error, response, responseText) {
-    debug('request(): Response from BBC obtained!');
+    log.debug('request(): Response from BBC obtained!');
 
     // Strip metadata
     responseText = responseText.substring(responseText.indexOf('<item>') + '<item>'.length);
     var stories = parseFeed(responseText);
 
     if(gWillCacheFirstData == true) {
-      debug('request(): Caching only for first run.');
+      log.debug('request(): Caching only for first run.');
       gWillCacheFirstData = false;
     } else {
       // Push pins
-      debug('request(): Pushing ' + stories.length + ' new pins.');
+      log.debug('request(): Pushing ' + stories.length + ' new pins.');
 
       for(var i = 0; i < stories.length; i++) {
         var pubDate = moment(stories[i].date);
@@ -188,35 +181,25 @@ function download() {
         // Push pins to sandbox and production
         if(PUSH_TO_PRODUCTION) {
           timelinejs.insertSharedPin(pin, [TOPIC_HEADLINES], config.API_KEY_PROD, function(responseText) {
-            debug('timelineRequest(): Production pin push result: ' + responseText);
+            log.debug('timelineRequest(): Production pin push result: ' + responseText);
           });
           // timelineRequest(pinNotif, 'PUT', [TOPIC_HEADLINES_NOTIFS], config.API_KEY_PROD, function(responseText) {
-          //   debug('timelineRequest(): Production pin with notif push result: ' + responseText);
+          //   log.debug('timelineRequest(): Production pin with notif push result: ' + responseText);
           // });
         }
         timelinejs.insertSharedPin(pin, [TOPIC_HEADLINES], config.API_KEY_SANDBOX, function(responseText) {
-          debug('timelineRequest(): Sandbox pin push result: ' + responseText);
+          log.debug('timelineRequest(): Sandbox pin push result: ' + responseText);
         });  
         // timelineRequest(pinNotif, 'PUT', [TOPIC_HEADLINES_NOTIFS], config.API_KEY_SANDBOX, function(responseText) {
-        //   debug('timelineRequest(): Sandbox pin with notif push result: ' + responseText);
+        //   log.debug('timelineRequest(): Sandbox pin with notif push result: ' + responseText);
         // });
 
-        // Push to Plural
-        request(config.IP_URL, function(err, response, body) {
-          if(err) {
-            console.log('Error getting IP: ' + JSON.stringify(err));
-            return;
-          }
-
-          var ip = JSON.parse(body).ip;
-          var msg = pin.layout.title + ' - ' + pin.layout.body;
-          plural.post(ip, 'news_headlines__latest', msg);
-        });
+        plural.post('news_headlines__latest', pin.layout.title + ' - ' + pin.layout.body);
       }
     }
-    debug('Last updated: ' + new Date().toISOString());
+    log.debug('Last updated: ' + new Date().toISOString());
   });
-  debug('request(): request sent');
+  log.debug('request(): request sent');
 };
 
 /********************************* Images *************************************/
@@ -241,7 +224,7 @@ var getPixels = function(png) {
 
   // From [{r,g,b,a==65535}] to uint8t
   // var info = imagemagick.identify({'srcData': png});
-  // debug('info: ' + JSON.stringify(info));
+  // log.debug('info: ' + JSON.stringify(info));
 
   // var arr = imagemagick.getConstPixels({
   //   'srcData': png,
@@ -282,10 +265,10 @@ var app = express();
 app.set('port', config.PORTS.THIS);
 
 app.get('/convert', function(req, res) {
-  debug('[' + new Date().toString() + '] Convert requested: ' + req.query.url);
+  log.debug('[' + new Date().toString() + '] Convert requested: ' + req.query.url);
   var start = new Date().getTime();
 
-  debug('Imagemagick is removed, doing nothing.');
+  log.debug('Imagemagick is removed, doing nothing.');
   res.send([0,0,0]);
 
   // request({'uri': req.query.url, 'encoding': null}, function(error, response, body) {
@@ -302,20 +285,20 @@ app.get('/convert', function(req, res) {
   //       res.send(pixels);
 
   //       var finish = new Date().getTime();
-  //       debug('Sent after ' + (finish - start) + ' ms.');
+  //       log.debug('Sent after ' + (finish - start) + ' ms.');
   //     } catch(error) {
-  //       debug('Error converting image: ' + error);
+  //       log.debug('Error converting image: ' + error);
   //       var result = [0, 0, 0];
   //       res.send(result);
   //     }
   //   } else {
-  //     debug('Error downloading image data: ' + error);
+  //     log.debug('Error downloading image data: ' + error);
   //   }
   // });
 });
 
 app.get('/status', function(req, res) {
-  debug('[' + new Date().toString() + '] Status requested.');
+  log.debug('[' + new Date().toString() + '] Status requested.');
 
   res.setHeader('Content-Type', 'text/html');
   res.write('OK\n');
@@ -323,10 +306,10 @@ app.get('/status', function(req, res) {
 });
 
 app.listen(app.get('port'), function() {
-  debug('Node app is running at localhost:' + app.get('port'));
+  log.debug('Node app is running at localhost:' + app.get('port'));
 
   setInterval(function() {
-    debug('Updating...');
+    log.debug('Updating...');
     download();
   }, INTERVAL);
   download();
