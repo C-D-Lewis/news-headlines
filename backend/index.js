@@ -262,7 +262,7 @@ var getPixels = function(png) {
 
 var app = express();
 
-app.set('port', config.PORTS.THIS);
+app.set('port', config.PORT);
 
 app.get('/convert', function(req, res) {
   log.debug('[' + new Date().toString() + '] Convert requested: ' + req.query.url);
