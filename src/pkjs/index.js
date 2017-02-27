@@ -1,7 +1,7 @@
 var config = require('./config.json');
 
 var DEBUG = false;  // Turn off for release
-var VERSION = '4.5';  // Match package.json
+var VERSION = '4.6';  // Match package.json
 var MAX_ITEMS = 20;   // Max feed items the app will display
 var DATA_SIZE = 1950; // Max AppMessage image chunk size (pre-dates 8k buffers)
 var THUMBNAIL_WIDTH = 144;
