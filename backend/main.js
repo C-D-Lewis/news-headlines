@@ -4,6 +4,7 @@ var moment = require('moment-timezone');
 var request = require('request');
 var timelinejs = require('pebble-timeline-js-node');
 
+var activityServerClient = require('./modules/activity_server_client.js');
 var config = require('./config.json');
 var log = require('./modules/log.js');
 var plural = require('./modules/plural.js');
@@ -180,17 +181,17 @@ function download() {
 
         // Push pins to sandbox and production
         if(PUSH_TO_PRODUCTION) {
-          timelinejs.insertSharedPin(pin, [TOPIC_HEADLINES], config.API_KEY_PROD, function(responseText) {
+          timelinejs.insertSharedPin(pin, [TOPIC_HEADLINES], config.ENV.API_KEY_PROD, function(responseText) {
             log.debug('timelineRequest(): Production pin push result: ' + responseText);
           });
-          // timelineRequest(pinNotif, 'PUT', [TOPIC_HEADLINES_NOTIFS], config.API_KEY_PROD, function(responseText) {
+          // timelineRequest(pinNotif, 'PUT', [TOPIC_HEADLINES_NOTIFS], config.ENV.API_KEY_PROD, function(responseText) {
           //   log.debug('timelineRequest(): Production pin with notif push result: ' + responseText);
           // });
         }
-        timelinejs.insertSharedPin(pin, [TOPIC_HEADLINES], config.API_KEY_SANDBOX, function(responseText) {
+        timelinejs.insertSharedPin(pin, [TOPIC_HEADLINES], config.ENV.API_KEY_SANDBOX, function(responseText) {
           log.debug('timelineRequest(): Sandbox pin push result: ' + responseText);
         });  
-        // timelineRequest(pinNotif, 'PUT', [TOPIC_HEADLINES_NOTIFS], config.API_KEY_SANDBOX, function(responseText) {
+        // timelineRequest(pinNotif, 'PUT', [TOPIC_HEADLINES_NOTIFS], config.ENV.API_KEY_SANDBOX, function(responseText) {
         //   log.debug('timelineRequest(): Sandbox pin with notif push result: ' + responseText);
         // });
 
@@ -258,60 +259,63 @@ var getPixels = function(png) {
   // return result;
 }
 
-/******************************** Express *************************************/
+/********************************** App ***************************************/
 
 var app = express();
 
-app.set('port', config.PORT);
+function main() {
+  app.get('/convert', function(req, res) {
+    log.debug('[' + new Date().toString() + '] Convert requested: ' + req.query.url);
+    var start = new Date().getTime();
 
-app.get('/convert', function(req, res) {
-  log.debug('[' + new Date().toString() + '] Convert requested: ' + req.query.url);
-  var start = new Date().getTime();
+    log.debug('Imagemagick is removed, doing nothing.');
+    res.send([0,0,0]);
 
-  log.debug('Imagemagick is removed, doing nothing.');
-  res.send([0,0,0]);
+    // request({'uri': req.query.url, 'encoding': null}, function(error, response, body) {
+    //   if(!error) {
+    //     try {
+    //       var png = imagemagick.convert({
+    //         'srcData': body,
+    //         'srcFormat': 'jpg',
+    //         'format': 'png'
+    //       });
 
-  // request({'uri': req.query.url, 'encoding': null}, function(error, response, body) {
-  //   if(!error) {
-  //     try {
-  //       var png = imagemagick.convert({
-  //         'srcData': body,
-  //         'srcFormat': 'jpg',
-  //         'format': 'png'
-  //       });
+    //       var pixels = getPixels(png);
 
-  //       var pixels = getPixels(png);
+    //       res.send(pixels);
 
-  //       res.send(pixels);
+    //       var finish = new Date().getTime();
+    //       log.debug('Sent after ' + (finish - start) + ' ms.');
+    //     } catch(error) {
+    //       log.debug('Error converting image: ' + error);
+    //       var result = [0, 0, 0];
+    //       res.send(result);
+    //     }
+    //   } else {
+    //     log.debug('Error downloading image data: ' + error);
+    //   }
+    // });
+  });
 
-  //       var finish = new Date().getTime();
-  //       log.debug('Sent after ' + (finish - start) + ' ms.');
-  //     } catch(error) {
-  //       log.debug('Error converting image: ' + error);
-  //       var result = [0, 0, 0];
-  //       res.send(result);
-  //     }
-  //   } else {
-  //     log.debug('Error downloading image data: ' + error);
-  //   }
-  // });
-});
+  app.get('/status', function(req, res) {
+    log.debug('[' + new Date().toString() + '] Status requested.');
+    activityServerClient.post();
 
-app.get('/status', function(req, res) {
-  log.debug('[' + new Date().toString() + '] Status requested.');
+    res.setHeader('Content-Type', 'text/html');
+    res.write('OK\n');
+    res.end();
+  });
 
-  res.setHeader('Content-Type', 'text/html');
-  res.write('OK\n');
-  res.end();
-});
+  app.listen(config.ENV.PORT, function() {
+    log.debug('Node app is running at localhost:' + config.ENV.PORT);
+    plural.post('news_headlines__boot', 'News Headlines server booted up!');
 
-app.listen(app.get('port'), function() {
-  log.debug('Node app is running at localhost:' + app.get('port'));
-  plural.post('news_headlines__boot', 'News Headlines server booted up!');
-
-  setInterval(function() {
-    log.debug('Updating...');
+    setInterval(function() {
+      log.debug('Updating...');
+      download();
+    }, INTERVAL);
     download();
-  }, INTERVAL);
-  download();
-});
+  });
+}
+
+main();

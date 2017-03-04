@@ -59,9 +59,10 @@ function fatal(msg) {
   process.exit(1);
 }
 
-function assert(condition, msg) {
+function assert(condition, msg, strict) {
   if(!condition) {
-    error('Assertion failed: ' + msg);
+    msg = 'Assertion failed: ' + msg;
+    strict ? fatal(msg) : error(msg);
   }
 }
 
