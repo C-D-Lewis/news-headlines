@@ -308,7 +308,6 @@ function main() {
 
   app.listen(config.ENV.PORT, function() {
     log.debug('Node app is running at localhost:' + config.ENV.PORT);
-    plural.post('news_headlines__boot', 'News Headlines server booted up!');
 
     setInterval(function() {
       log.debug('Updating...');
