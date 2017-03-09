@@ -1,7 +1,7 @@
 var request = require('request');
 
 var boot = require('./boot.js');
-var config = require('../config.json');
+var config = require('../../config.json');
 var log = require('./log.js');
 
 function post(channel, message) {

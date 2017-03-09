@@ -4,10 +4,10 @@ var moment = require('moment-timezone');
 var request = require('request');
 var timelinejs = require('pebble-timeline-js-node');
 
-var activityServerClient = require('./modules/activity_server_client.js');
-var config = require('./config.json');
-var log = require('./modules/log.js');
-var plural = require('./modules/plural.js');
+var activityServerClient = require('./common/activity_server_client.js');
+var config = require('../config.json');
+var log = require('./common/log.js');
+var plural = require('./common/plural.js');
 
 /*********************************** Config ***********************************/
 
@@ -265,7 +265,7 @@ var app = express();
 
 function main() {
   app.get('/convert', function(req, res) {
-    log.debug('[' + new Date().toString() + '] Convert requested: ' + req.query.url);
+    log.debug('Convert requested: ' + req.query.url);
     var start = new Date().getTime();
 
     log.debug('Imagemagick is removed, doing nothing.');
@@ -298,7 +298,7 @@ function main() {
   });
 
   app.get('/status', function(req, res) {
-    log.debug('[' + new Date().toString() + '] Status requested.');
+    log.debug('Status requested.');
     activityServerClient.post();
 
     res.setHeader('Content-Type', 'text/html');
