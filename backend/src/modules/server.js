@@ -1,7 +1,7 @@
 var express = require('express');
 
 var activityServerClient = require('../common/activity_server_client.js');
-var config = require('../../config.json');
+var config = require('../common/config.js');
 var images = require('./images.js');
 var log = require('../common/log.js');
 

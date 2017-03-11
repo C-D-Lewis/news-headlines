@@ -1,4 +1,4 @@
-var config = require('../config.json');
+var config = require('./common/config.js');
 var data = require('./modules/data.js');
 var log = require('./common/log.js');
 var server = require('./modules/server.js');

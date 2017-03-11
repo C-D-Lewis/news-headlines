@@ -2,7 +2,7 @@ var request = require('request');
 var moment = require('moment-timezone');
 var timelinejs = require('pebble-timeline-js-node');
 
-var config = require('../../config.json');
+var config = require('../common/config.js');
 var log = require('../common/log.js');
 var plural = require('../common/plural.js');
 
