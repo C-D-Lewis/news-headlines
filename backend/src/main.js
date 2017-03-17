@@ -4,7 +4,7 @@ var log = require('./common/log.js');
 var server = require('./modules/server.js');
 
 (function main() {
-  log.verbose('===== News Headlines Backend =====');
+  log.begin();
   server.setup();
 
   setInterval(data.download, config.ENV.UPDATE_INTERVAL_M * 1000 * 60);

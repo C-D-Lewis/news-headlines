@@ -66,6 +66,16 @@ function assert(condition, msg, strict) {
   }
 }
 
+function begin() {
+  verbose('===== ' + getAppName() + ' =====');
+  process.on('uncaughtException', function(err) {
+    error('uncaughtException:');
+    error(err);
+    fatal('Application must now exit');
+  });
+}
+
+module.exports.begin = begin;
 module.exports.info = info;
 module.exports.debug = debug;
 module.exports.error = error;
