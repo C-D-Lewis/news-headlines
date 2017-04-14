@@ -67,7 +67,7 @@ function assert(condition, msg, strict) {
 }
 
 function begin() {
-  verbose('===== ' + getAppName() + ' =====');
+  verbose('===== ' + getAppName() + ' (' + process.pid + ') =====');
   process.on('uncaughtException', function(err) {
     error('uncaughtException:');
     error(err);

@@ -18,8 +18,7 @@
   "PORTS": {
     "PLURAL": 5550
   },
-  "ACTIVITY_SERVER": {
-    "POST": true,
+  "LED_SERVER_CLIENT": {
     "PORT": 5555
   }
 }
