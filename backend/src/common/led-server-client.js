@@ -19,7 +19,7 @@ function makeRequest(method, payload) {
 
 function setAll(rgbArr) {
   var payload = {};
-  for(var i = 0; i < config.ENV.NUM_LEDS; i++) {
+  for(var i = 0; i < config.LED_SERVER_CLIENT.NUM_LEDS; i++) {
     payload['' + i] = rgbArr;
   }
   makeRequest('set', payload);

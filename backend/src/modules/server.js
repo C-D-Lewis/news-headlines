@@ -2,6 +2,7 @@ var express = require('express');
 
 var ledServerClient = require('../common/led-server-client.js');
 var config = require('../common/config.js');
+var evtDaily = require('../common/evt-daily.js');
 var images = require('./images.js');
 var log = require('../common/log.js');
 
@@ -13,6 +14,7 @@ function setup() {
   app.get('/status', function(req, res) {
     log.debug('Status requested.');
     ledServerClient.blink(6, [0, 0, 20]);
+    evtDaily.increment();
 
     res.setHeader('Content-Type', 'text/html');
     res.send('OK\n');

@@ -25,11 +25,12 @@ function _log(msg) {
 
   if(config.LOG.ENABLED) {
     var filePath = config.ENV.INSTALL_PATH + '/' + config.LOG.LOG_NAME;
+    var stream;
     if(!fs.existsSync(filePath)) {
-      var stream = fs.createWriteStream(filePath, {'flags': 'w'});  
+      stream = fs.createWriteStream(filePath, {'flags': 'w'});  
       stream.end(getTimeString() + ' New log file!\n');
     }
-    var stream = fs.createWriteStream(filePath, {'flags': 'a'});
+    stream = fs.createWriteStream(filePath, {'flags': 'a'});
     stream.end(msg + '\n');
   }
 }
@@ -62,12 +63,13 @@ function fatal(msg) {
 function assert(condition, msg, strict) {
   if(!condition) {
     msg = 'Assertion failed: ' + msg;
-    strict ? fatal(msg) : error(msg);
+    var fun = strict ? fatal : error;
+    fun(msg);
   }
 }
 
 function begin() {
-  verbose('===== ' + getAppName() + ' (' + process.pid + ') =====');
+  verbose('===== ' + getAppName() + ' (PID: ' + process.pid + ') =====');
   process.on('uncaughtException', function(err) {
     error('uncaughtException:');
     error(err);

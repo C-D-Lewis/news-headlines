@@ -19,6 +19,12 @@
     "PLURAL": 5550
   },
   "LED_SERVER_CLIENT": {
+    "NUM_LEDS": 8,
     "PORT": 5555
+  },
+  "EVT_DAILY": {
+    "OPERATOR_API_KEY": "",
+    "THNG_ID": "",
+    "PROPERTY_KEY": ""
   }
 }
