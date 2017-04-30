@@ -10,15 +10,15 @@ function isArray(a) {
   return Object.prototype.toString.call(a) === '[object Array]';
 }
 
-function checkObject(parentKey, spec, query) {
+function checkObject(context, parentKey, spec, query) {
   for(var key in spec) {
     var value = spec[key];
     if(query.hasOwnProperty(key)) {
       if(typeof value === 'object' && !isArray(value)) {
-        checkObject(key, value, query[key]);
+        checkObject(context, key, value, query[key]);
       }
     } else {
-      console.log('config.json key \'' + key + '\' not found in ' + parentKey);
+      console.log(context + ' key \'' + key + '\' not found in ' + parentKey);
       error = true;
     }
   }
@@ -44,9 +44,15 @@ function checkObject(parentKey, spec, query) {
   // Verify config against default
   var defaultConfig = require(DEFAULT_CONFIG_PATH);
   config = require(CONFIG_PATH);
-  checkObject('root', defaultConfig, config);
+  checkObject('config.json', 'root', defaultConfig, config);
   if(error) {
     console.log('config.json is missing items from config-default.json');
+    process.exit();
+  }
+
+  checkObject('config-default.json', 'root', config, defaultConfig);
+  if(error) {
+    console.log('config-default.json is missing items from config.json');
     process.exit();
   }
 
