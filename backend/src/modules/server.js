@@ -6,6 +6,12 @@ var evtDaily = require('../common/evt-daily.js');
 var images = require('./images.js');
 var log = require('../common/log.js');
 
+config.requireKeys('server.js', {
+  ENV: {
+    PORT: 5000
+  }
+});
+
 var app = express();
 
 function setup() {

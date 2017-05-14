@@ -3,6 +3,14 @@ var request = require('request');
 var config = require('./config.js');
 var log = require('./log.js');
 
+config.requireKeys('evt-daily.js', {
+  EVT_DAILY: {
+    OPERATOR_API_KEY: '',
+    PROPERTY_KEY: '',
+    THNG_ID: ''
+  }
+});
+
 var value = 0;
 
 function post(done) {

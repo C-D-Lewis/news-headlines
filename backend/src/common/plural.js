@@ -4,6 +4,15 @@ var boot = require('./boot.js');
 var config = require('./config.js');
 var log = require('./log.js');
 
+config.requireKeys('plural.js', {
+  ENV: {
+    REQUEST_TIMEOUT_MS: 30000
+  },
+  PORTS: {
+    PLURAL: 5550
+  }
+});
+
 function post(channel, message) {
   boot.getServerUrl(function(serverUrl) {
     var data = {

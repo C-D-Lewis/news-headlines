@@ -1,6 +1,14 @@
 var fs = require('fs');
 
 var config = require('./config.js');
+config.requireKeys('log.js', {
+  LOG: {
+    APP_NAME: '',
+    LOG_NAME: 'app.log',
+    LEVEL: 'info',
+    ENABLED: true
+  }
+});
 
 function getAppName() {
   return '[' + config.LOG.APP_NAME + ']';
@@ -24,7 +32,7 @@ function _log(msg) {
   console.log(msg);
 
   if(config.LOG.ENABLED) {
-    var filePath = config.ENV.INSTALL_PATH + '/' + config.LOG.LOG_NAME;
+    var filePath = config.getInstallPath() + '/' + config.LOG.LOG_NAME;
     var stream;
     if(!fs.existsSync(filePath)) {
       stream = fs.createWriteStream(filePath, {'flags': 'w'});  

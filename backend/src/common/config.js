@@ -1,62 +1,47 @@
+var child_process = require('child_process');
 var fs = require('fs');
+var path = require('path');
 
 var CONFIG_PATH = __dirname + '/../../config.json';
-var DEFAULT_CONFIG_PATH = __dirname + '/../config-default.json';
 
-var config = null;
-var error = false;
+var config = {};
 
-function isArray(a) {
-  return Object.prototype.toString.call(a) === '[object Array]';
-}
-
-function checkObject(context, parentKey, spec, query) {
+function compareObject(context, parentKey, spec, query) {
+  var error = false;
   for(var key in spec) {
     var value = spec[key];
     if(query.hasOwnProperty(key)) {
-      if(typeof value === 'object' && !isArray(value)) {
-        checkObject(context, key, value, query[key]);
+      if(typeof value === 'object' && !Array.isArray(value)) {
+        compareObject(context, key, value, query[key]);
       }
     } else {
       console.log(context + ' key \'' + key + '\' not found in ' + parentKey);
       error = true;
     }
   }
+  if(error) process.exit();
 }
 
 (function verify() {
-  // Check config exists
   if(!fs.existsSync(CONFIG_PATH)) {
-    // Check default exists
-    if(!fs.existsSync(DEFAULT_CONFIG_PATH)) {
-      console.log('config-default.js not available for this app!');
-      fs.writeFileSync(DEFAULT_CONFIG_PATH, JSON.stringify({}, null, 2), 'utf8');
-      process.exit();
-    }
-
-    // Replicate default
-    config = require(DEFAULT_CONFIG_PATH);
-    fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2), 'utf8');
-    console.log('Set up config.json from config-default.json');
+    config = {};
+    fs.writeFileSync(CONFIG_PATH, config, 'utf8');
+    console.log('Set up empty config.json');
     return;
   }
-
-  // Verify config against default
-  var defaultConfig = require(DEFAULT_CONFIG_PATH);
+  console.log('config.json loaded');
   config = require(CONFIG_PATH);
-  checkObject('config.json', 'root', defaultConfig, config);
-  if(error) {
-    console.log('config.json is missing items from config-default.json');
-    process.exit();
-  }
-
-  checkObject('config-default.json', 'root', config, defaultConfig);
-  if(error) {
-    console.log('config-default.json is missing items from config.json');
-    process.exit();
-  }
-
-  console.log('config.json loaded successfully');
 })();
 
+// Allow modules to require certain keys in config.json
+config.requireKeys = function(moduleName, moduleSpec) {
+  compareObject('Module ' + moduleName, 'root', moduleSpec, config);
+};
+
+// Get the app's install path
+config.getInstallPath = function() {
+  return child_process.execSync('pwd').toString().trim();
+}
+
+// Behave as if I required config.json directly, with tests!
 module.exports = config;

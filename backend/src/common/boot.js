@@ -3,6 +3,13 @@ var request = require('request');
 var config = require('./config.js');
 var log = require('./log.js');
 
+config.requireKeys('boot.js', {
+  ENV: {
+    BOOT_URL: '',
+    REQUEST_TIMEOUT_MS: 30000
+  }
+});
+
 var serverUrl = null;
 
 function getServerUrl(cb) {

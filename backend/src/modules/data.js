@@ -6,6 +6,14 @@ var config = require('../common/config.js');
 var log = require('../common/log.js');
 var plural = require('../common/plural.js');
 
+config.requireKeys('data.js', {
+  ENV: {
+    PUSH_TO_PRODUCTION: true,
+    API_KEY_PROD: '',
+    API_KEY_SANDBOX: ''
+  }
+});
+
 var TOPIC_HEADLINES = 'headlines';
 // var TOPIC_HEADLINES_NOTIFS = 'headlines-notifs';
 var MAX_PUSHED = 1;  // Max pins pushed each INTERVAL. Prevents infamous timeline blob db errors.

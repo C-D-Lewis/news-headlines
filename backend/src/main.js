@@ -4,6 +4,12 @@ var evtDaily = require('./common/evt-daily.js');
 var log = require('./common/log.js');
 var server = require('./modules/server.js');
 
+config.requireKeys('main.js', {
+  ENV: {
+    UPDATE_INTERVAL_M: 240
+  }
+});
+
 (function main() {
   log.begin();
   server.setup();

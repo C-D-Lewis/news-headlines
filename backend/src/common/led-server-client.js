@@ -3,6 +3,13 @@ var request = require('request');
 var config = require('../common/config.js');
 var log = require('../common/log.js');
 
+config.requireKeys('led-server-client.js', {
+  LED_SERVER_CLIENT: {
+    PORT: 5555,
+    NUM_LEDS: 8
+  }
+});
+
 function makeRequest(method, payload) {
   var url = 'http://127.0.0.1:' + config.LED_SERVER_CLIENT.PORT + '/' + method;
   request.post({
