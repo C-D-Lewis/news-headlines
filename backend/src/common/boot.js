@@ -1,7 +1,7 @@
-var request = require('request');
+const request = require('request');
 
-var config = require('./config.js');
-var log = require('./log.js');
+const config = require('./config.js');
+const log = require('./log.js');
 
 config.requireKeys('boot.js', {
   ENV: {
@@ -13,15 +13,12 @@ config.requireKeys('boot.js', {
 var serverUrl = null;
 
 function getServerUrl(cb) {
-  if(serverUrl !== null) {
-    cb(serverUrl);
-    return;
-  }
+  if(serverUrl !== null) return cb(serverUrl);
 
   request({
     url: config.ENV.BOOT_URL,
     timeout: config.ENV.REQUEST_TIMEOUT_MS
-  }, function(err, response, body) {
+  }, (err, response, body) => {
     if(err) {
       log.error(err);
       log.fatal('Error getting boot!');
@@ -33,11 +30,13 @@ function getServerUrl(cb) {
     }
 
     serverUrl = JSON.parse(body).ip;
-    log.info('Server URL: ' + serverUrl);
+    log.info(`Server URL: ${serverUrl}`);
 
     response.destroy();
     cb(serverUrl);
   });
 }
 
-module.exports.getServerUrl = getServerUrl;
+module.exports = {
+  getServerUrl: getServerUrl
+};

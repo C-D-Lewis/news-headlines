@@ -1,8 +1,8 @@
-var config = require('./common/config.js');
-var data = require('./modules/data.js');
-var evtDaily = require('./common/evt-daily.js');
-var log = require('./common/log.js');
-var server = require('./modules/server.js');
+const config = require('./common/config.js');
+const data = require('./modules/data.js');
+const evtDaily = require('./common/evt-daily.js');
+const log = require('./common/log.js');
+const server = require('./modules/server.js');
 
 config.requireKeys('main.js', {
   ENV: {
@@ -10,7 +10,7 @@ config.requireKeys('main.js', {
   }
 });
 
-(function main() {
+(() => {
   log.begin();
   server.setup();
   evtDaily.begin();

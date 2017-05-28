@@ -1,10 +1,10 @@
-var express = require('express');
+const express = require('express');
 
-var ledServerClient = require('../common/led-server-client.js');
-var config = require('../common/config.js');
-var evtDaily = require('../common/evt-daily.js');
-var images = require('./images.js');
-var log = require('../common/log.js');
+const ledServerClient = require('../common/led-server-client.js');
+const config = require('../common/config.js');
+const evtDaily = require('../common/evt-daily.js');
+const images = require('./images.js');
+const log = require('../common/log.js');
 
 config.requireKeys('server.js', {
   ENV: {
@@ -12,12 +12,12 @@ config.requireKeys('server.js', {
   }
 });
 
-var app = express();
+const app = express();
 
 function setup() {
   app.get('/convert', images.handleImageRequest);
 
-  app.get('/status', function(req, res) {
+  app.get('/status', (req, res) => {
     log.debug('Status requested.');
     ledServerClient.blink(6, [0, 0, 20]);
     evtDaily.increment();
@@ -27,8 +27,10 @@ function setup() {
   });
 
   app.listen(config.ENV.PORT, function() {
-    log.debug('Node app is running at localhost:' + config.ENV.PORT);
+    log.debug(`Express app is running at localhost:${config.ENV.PORT}`);
   });
 }
 
-module.exports.setup = setup;
+module.exports = {
+  setup: setup
+};

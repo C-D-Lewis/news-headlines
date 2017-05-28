@@ -1,8 +1,8 @@
-var request = require('request');
+const request = require('request');
 
-var boot = require('./boot.js');
-var config = require('./config.js');
-var log = require('./log.js');
+const boot = require('./boot.js');
+const config = require('./config.js');
+const log = require('./log.js');
 
 config.requireKeys('plural.js', {
   ENV: {
@@ -14,22 +14,20 @@ config.requireKeys('plural.js', {
 });
 
 function post(channel, message) {
-  boot.getServerUrl(function(serverUrl) {
-    var data = {
+  boot.getServerUrl((serverUrl) => {
+    const data = {
       channel: channel,
       message: message
     };
-    log.info('Calling Plural with: ' + JSON.stringify(data));
+    log.info(`Calling Plural with: ${JSON.stringify(data)}`);
 
     try {
       request.post({
-        url: 'http://' + serverUrl + ':' + config.PORTS.PLURAL + '/post',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        url: `http://${serverUrl}:${config.PORTS.PLURAL}/post`,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
         timeout: config.ENV.REQUEST_TIMEOUT_MS
-      }, function(err, response, body) {
+      }, (err, response, body) => {
         if(err) {
           log.error('Error posting to Plural');
           log.error(err);
@@ -45,4 +43,6 @@ function post(channel, message) {
   });
 }
 
-module.exports.post = post;
+module.exports = {
+  post: post
+};

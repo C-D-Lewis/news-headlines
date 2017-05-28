@@ -1,6 +1,6 @@
 // var imagemagick = require('imagemagick-native');
 
-var log = require('../common/log.js');
+const log = require('../common/log.js');
 
 // var downloadBinaryResource = function(imgUrl, callback, failedCallback) {
 //   request({'uri': imgUrl, 'encoding': null}, function(error, response, body) {
@@ -17,7 +17,7 @@ var log = require('../common/log.js');
 //   return val >>= 14;  // Magic value that works!
 // }
 
-var getPixels = function(png) {
+function getPixels(png) {
   return [];  // Removed when 144x81 images were removed from the feed
 
   // From [{r,g,b,a==65535}] to uint8t
@@ -57,11 +57,11 @@ var getPixels = function(png) {
 }
 
 function handleImageRequest(req, res) {
-  log.debug('Convert requested: ' + req.query.url);
-  var start = new Date().getTime();
+  log.debug(`Convert requested: ${req.query.url}`);
+  const start = new Date().getTime();
 
   log.debug('Imagemagick is removed, doing nothing.');
-  res.send([0,0,0]);
+  res.send([0, 0, 0]);
 
   // request({'uri': req.query.url, 'encoding': null}, function(error, response, body) {
   //   if(!error) {
@@ -89,4 +89,6 @@ function handleImageRequest(req, res) {
   // });
 }
 
-module.exports.handleImageRequest = handleImageRequest;
+module.exports = {
+  handleImageRequest: handleImageRequest
+};

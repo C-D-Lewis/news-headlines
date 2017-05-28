@@ -1,7 +1,7 @@
-var request = require('request');
+const request = require('request');
 
-var config = require('./config.js');
-var log = require('./log.js');
+const config = require('./config.js');
+const log = require('./log.js');
 
 config.requireKeys('evt-daily.js', {
   EVT_DAILY: {
@@ -14,36 +14,32 @@ config.requireKeys('evt-daily.js', {
 var value = 0;
 
 function post(done) {
-  var data = [{
+  const data = [{
     key: config.EVT_DAILY.PROPERTY_KEY,
     value: value
   }];
-  log.info('evt-daily >> ' + JSON.stringify(data));
+  log.info(`evt-daily >> ${JSON.stringify(data)}`);
   
   request.post({
-    url: 'https://api.evrythng.com/thngs/' + config.EVT_DAILY.THNG_ID + '/properties',
+    url: `https://api.evrythng.com/thngs/${config.EVT_DAILY.THNG_ID}/properties`,
     headers: {
       'Content-Type': 'application/json',
       'Authorization': config.EVT_DAILY.OPERATOR_API_KEY
     },
     body: JSON.stringify(data)
-  }, function(err, response, body) {
+  }, (err, response, body) => {
     if(err) {
       log.error(err);
       return done();
     }
-    log.info('evt-daily << ' + JSON.stringify(body));
+    log.info(`evt-daily << ${JSON.stringify(body)}`);
     done();
   });
 }
 
 function onMinuteChange() {
-  var date = new Date();
-  if(date.getHours() == 23 && date.getMinutes() == 59) {
-    post(function() {
-      value = 0;
-    });
-  }
+  const date = new Date();
+  if(date.getHours() == 23 && date.getMinutes() == 59) post(() => value = 0);
 }
 
 function increment() {
@@ -54,5 +50,7 @@ function begin() {
   setInterval(onMinuteChange, 1000 * 60);
 }
 
-module.exports.increment = increment;
-module.exports.begin = begin;
+module.exports = {
+  increment: increment,
+  begin: begin
+};
