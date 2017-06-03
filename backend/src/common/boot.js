@@ -1,3 +1,4 @@
+const async = require('async');
 const request = require('request');
 
 const config = require('./config.js');
@@ -10,33 +11,53 @@ config.requireKeys('boot.js', {
   }
 });
 
-var serverUrl = null;
+var ip = null;
 
-function getServerUrl(cb) {
-  if(serverUrl !== null) return cb(serverUrl);
+function getUrl() {
+  return new Promise((resolve, reject) => {
+    if(ip !== null) return resolve(ip);
 
-  request({
-    url: config.ENV.BOOT_URL,
-    timeout: config.ENV.REQUEST_TIMEOUT_MS
-  }, (err, response, body) => {
-    if(err) {
-      log.error(err);
-      log.fatal('Error getting boot!');
-    }
+    request({
+      url: config.ENV.BOOT_URL,
+      timeout: config.ENV.REQUEST_TIMEOUT_MS
+    }, (err, response, body) => {
+      if(err) {
+        log.error(err);
+        log.error('Error getting boot!');
+      }
+      try {
+        ip = JSON.parse(body).ip;
+        log.info(`Server URL: ${ip}`);
 
-    if(!body) {
-      log.error('No body!');
-      log.fatal('Can\'t get boot!');
-    }
+        response.destroy();
+        return resolve(ip);
+      } catch(e) {
+        log.error('Can\'t get ip from response!');
+      }
+    });
+  });
+}
 
-    serverUrl = JSON.parse(body).ip;
-    log.info(`Server URL: ${serverUrl}`);
+function getServerUrl() {
+  return getUrl();
+}
 
-    response.destroy();
-    cb(serverUrl);
+function refresh() {
+  ip = null;
+  return new Promise((resolve, reject) => {
+    async.retry({
+      times: 60,
+      interval: 60000
+    }, (done) => {
+      log.info('Retrying...');
+      getUrl()
+        .then(() => done(null, null))
+        .catch((err) => done(err, null));
+    }, (err, results) => resolve());  
   });
 }
 
 module.exports = {
-  getServerUrl: getServerUrl
+  getServerUrl: getServerUrl,
+  refresh: refresh
 };

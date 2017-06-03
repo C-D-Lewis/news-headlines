@@ -75,6 +75,11 @@ function begin() {
     error(err.stack);
     fatal('Application must now exit');
   });
+  process.on('unhandledRejection', (err) => {
+    error('unhandledRejection:');
+    error(err.stack);
+    fatal('Application must now exit');
+  });
 }
 
 module.exports = {

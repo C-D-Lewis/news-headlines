@@ -14,7 +14,7 @@ config.requireKeys('plural.js', {
 });
 
 function post(channel, message) {
-  boot.getServerUrl((serverUrl) => {
+  boot.getServerUrl().then((serverUrl) => {
     const data = {
       channel: channel,
       message: message
@@ -31,6 +31,7 @@ function post(channel, message) {
         if(err) {
           log.error('Error posting to Plural');
           log.error(err);
+          boot.refresh().then(() => post(channel, message));
           return;
         }
 
