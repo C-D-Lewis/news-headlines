@@ -72,7 +72,7 @@ function begin() {
   verbose(`===== ${getAppName()} (PID: ${process.pid}) =====`);
   process.on('uncaughtException', (err) => {
     error('uncaughtException:');
-    error(err);
+    error(err.stack);
     fatal('Application must now exit');
   });
 }

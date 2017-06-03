@@ -15,7 +15,7 @@ function compareObject(context, parentKey, spec, query) {
         compareObject(context, key, value, query[key]);
       }
     } else {
-      console.log(`${context} key \'${key}\' not found in ${parentKey}`);
+      console.log(`${context} key '${key}' not found in ${parentKey}`);
       error = true;
     }
   }
@@ -33,14 +33,12 @@ function compareObject(context, parentKey, spec, query) {
 })();
 
 // Allow modules to require certain keys in config.json
-config.requireKeys = function(moduleName, moduleSpec) {
+config.requireKeys = (moduleName, moduleSpec) => {
   compareObject(`Module ${moduleName}`, 'root', moduleSpec, config);
 };
 
 // Get the app's install path
-config.getInstallPath = function() {
-  return execSync('pwd').toString().trim();
-}
+config.getInstallPath = () => execSync('pwd').toString().trim();
 
 // Behave as if I required config.json directly, with tests!
 module.exports = config;
