@@ -13,7 +13,7 @@ config.requireKeys('boot.js', {
 
 var ip = null;
 
-function getUrl() {
+function getServerUrl() {
   return new Promise((resolve, reject) => {
     if(ip !== null) return resolve(ip);
 
@@ -38,26 +38,6 @@ function getUrl() {
   });
 }
 
-function getServerUrl() {
-  return getUrl();
-}
-
-function refresh() {
-  ip = null;
-  return new Promise((resolve, reject) => {
-    async.retry({
-      times: 60,
-      interval: 60000
-    }, (done) => {
-      log.info('Retrying...');
-      getUrl()
-        .then(() => done(null, null))
-        .catch((err) => done(err, null));
-    }, (err, results) => resolve());  
-  });
-}
-
 module.exports = {
   getServerUrl: getServerUrl,
-  refresh: refresh
 };

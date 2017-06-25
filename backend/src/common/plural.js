@@ -31,7 +31,6 @@ function post(channel, message) {
         if(err) {
           log.error('Error posting to Plural');
           log.error(err);
-          boot.refresh().then(() => post(channel, message));
           return;
         }
 

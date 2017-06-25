@@ -6,7 +6,7 @@ config.requireKeys('log.js', {
     APP_NAME: '',
     LOG_NAME: 'app.log',
     LEVEL: 'info',
-    ENABLED: true
+    TO_FILE: true
   }
 });
 
@@ -19,7 +19,12 @@ function getTimeString() {
   return `[${str.substring(0, str.indexOf('.')).replace('T', ' ')}]`;
 }
 
-function _log(msg) {
+function setupPid() {
+  const path = `${config.getInstallPath()}/pid`;
+  fs.writeFileSync(path, process.pid, 'utf8');
+}
+
+function log(msg) {
   if(typeof msg === 'object') {
     if(msg.message) msg = msg.message;
     else msg = JSON.stringify(msg);
@@ -27,7 +32,7 @@ function _log(msg) {
   msg = `${getAppName()} ${getTimeString()} ${msg}`;
   console.log(msg);
 
-  if(config.LOG.ENABLED) {
+  if(config.LOG.TO_FILE) {
     const filePath = `${config.getInstallPath()}/${config.LOG.LOG_NAME}`;
     var stream;
     if(!fs.existsSync(filePath)) {
@@ -40,23 +45,23 @@ function _log(msg) {
 }
 
 function info(msg) {
-  if(config.LOG.LEVEL.includes('info')) _log(`[I] ${msg}`);
+  if(config.LOG.LEVEL.includes('info')) log(`[I] ${msg}`);
 }
 
 function debug(msg) {
-  if(config.LOG.LEVEL.includes('debug')) _log(`[D] ${msg}`);
+  if(config.LOG.LEVEL.includes('debug')) log(`[D] ${msg}`);
 }
 
 function verbose(msg) {
-  _log(`[V] ${msg}`);
+  log(`[V] ${msg}`);
 }
 
 function error(msg) {
-  _log(`[E] ${msg}`);
+  log(`[E] ${msg}`);
 }
 
 function fatal(msg) {
-  _log(`[F] ${msg}`);
+  log(`[F] ${msg}`);
   process.exit(1);
 }
 
@@ -69,14 +74,10 @@ function assert(condition, msg, strict) {
 }
 
 function begin() {
-  verbose(`===== ${getAppName()} (PID: ${process.pid}) =====`);
+  verbose(`===== ${getAppName()} =====`);
+  setupPid();
   process.on('uncaughtException', (err) => {
     error('uncaughtException:');
-    error(err.stack);
-    fatal('Application must now exit');
-  });
-  process.on('unhandledRejection', (err) => {
-    error('unhandledRejection:');
     error(err.stack);
     fatal('Application must now exit');
   });
