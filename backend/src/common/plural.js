@@ -1,8 +1,8 @@
 const request = require('request');
 
-const boot = require('./boot.js');
-const config = require('./config.js');
-const log = require('./log.js');
+const boot = require('./boot');
+const config = require('./config');
+const log = require('./log');
 
 config.requireKeys('plural.js', {
   ENV: {

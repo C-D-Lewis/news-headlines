@@ -1,7 +1,8 @@
+const async = require('async');
 const request = require('request');
 
-const config = require('./config.js');
-const log = require('./log.js');
+const config = require('./config');
+const log = require('./log');
 
 config.requireKeys('boot.js', {
   ENV: {

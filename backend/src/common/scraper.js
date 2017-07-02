@@ -1,4 +1,4 @@
-const log = require('./log.js');
+const log = require('./log');
 
 function scrape(text, beforeArr, after) {
   var index = 0;

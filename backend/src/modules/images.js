@@ -1,6 +1,6 @@
 // var imagemagick = require('imagemagick-native');
 
-const log = require('../common/log.js');
+const log = require('../common/log');
 
 // var downloadBinaryResource = function(imgUrl, callback, failedCallback) {
 //   request({'uri': imgUrl, 'encoding': null}, function(error, response, body) {

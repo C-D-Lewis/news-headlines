@@ -1,6 +1,7 @@
 const fs = require('fs');
 
-const config = require('./config.js');
+const config = require('./config');
+
 config.requireKeys('log.js', {
   LOG: {
     APP_NAME: '',
@@ -19,7 +20,7 @@ function getTimeString() {
   return `[${str.substring(0, str.indexOf('.')).replace('T', ' ')}]`;
 }
 
-function setupPid() {
+function setPid() {
   const path = `${config.getInstallPath()}/pid`;
   fs.writeFileSync(path, process.pid, 'utf8');
 }
@@ -75,9 +76,14 @@ function assert(condition, msg, strict) {
 
 function begin() {
   verbose(`===== ${getAppName()} =====`);
-  setupPid();
+  setPid();
   process.on('uncaughtException', (err) => {
     error('uncaughtException:');
+    error(err.stack);
+    fatal('Application must now exit');
+  });
+  process.on('unhandledRejection', (err) => {
+    error('unhandledRejection:');
     error(err.stack);
     fatal('Application must now exit');
   });

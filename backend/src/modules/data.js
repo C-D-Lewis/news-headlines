@@ -9,7 +9,6 @@ const scraper = require('../common/scraper');
 
 config.requireKeys('data.js', {
   ENV: {
-    PUSH_TO_PRODUCTION: true,
     API_KEY_PROD: '',
     API_KEY_SANDBOX: ''
   }
@@ -70,14 +69,8 @@ function pushPin(stories, index) {
   log.debug(`pin=${JSON.stringify(pin)}`);
 
   const TOPIC = 'headlines';
-  if(config.ENV.PUSH_TO_PRODUCTION) {
-    timelinejs.insertSharedPin(pin, [ TOPIC ], config.ENV.API_KEY_PROD, (res) => {
-      log.debug(`Production pin push result: ${res}`);
-    });
-  }
-  timelinejs.insertSharedPin(pin, [ TOPIC ], config.ENV.API_KEY_SANDBOX, (res) => {
-    log.debug(`Sandbox pin push result: ${res}`);
-  }); 
+  timelinejs.insertSharedPin(pin, [ TOPIC ], config.ENV.API_KEY_PROD, log.info);
+  timelinejs.insertSharedPin(pin, [ TOPIC ], config.ENV.API_KEY_SANDBOX, log.info); 
   plural.post('news_headlines__latest', `${pin.layout.title} - ${pin.layout.body}`);
 }
 

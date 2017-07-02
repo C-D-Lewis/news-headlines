@@ -1,7 +1,7 @@
-const config = require('./common/config.js');
-const data = require('./modules/data.js');
-const log = require('./common/log.js');
-const server = require('./modules/server.js');
+const config = require('./common/config');
+const data = require('./modules/data');
+const log = require('./common/log');
+const server = require('./modules/server');
 
 config.requireKeys('main.js', {
   ENV: {

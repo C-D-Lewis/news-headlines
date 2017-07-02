@@ -1,8 +1,8 @@
 const express = require('express');
 
-const config = require('../common/config.js');
-const images = require('./images.js');
-const log = require('../common/log.js');
+const config = require('../common/config');
+const images = require('./images');
+const log = require('../common/log');
 
 config.requireKeys('server.js', {
   ENV: {
