@@ -1,8 +1,6 @@
 const express = require('express');
 
-const ledServerClient = require('../common/led-server-client.js');
 const config = require('../common/config.js');
-const evtDaily = require('../common/evt-daily.js');
 const images = require('./images.js');
 const log = require('../common/log.js');
 
@@ -19,16 +17,11 @@ function setup() {
 
   app.get('/status', (req, res) => {
     log.debug('Status requested.');
-    ledServerClient.blink(6, [0, 0, 20]);
-    evtDaily.increment();
-
-    res.setHeader('Content-Type', 'text/html');
+    res.status(200);
     res.send('OK\n');
   });
 
-  app.listen(config.ENV.PORT, function() {
-    log.debug(`Express app is running at localhost:${config.ENV.PORT}`);
-  });
+  app.listen(config.ENV.PORT, () => log.debug(`Express app is running on ${config.ENV.PORT}`));
 }
 
 module.exports = {

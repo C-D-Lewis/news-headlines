@@ -1,4 +1,3 @@
-const async = require('async');
 const request = require('request');
 
 const config = require('./config.js');
