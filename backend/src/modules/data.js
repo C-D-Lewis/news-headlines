@@ -4,7 +4,7 @@ const timelinejs = require('pebble-timeline-js-node');
 
 const config = require('../common/config');
 const log = require('../common/log');
-const plural = require('../common/plural');
+const fcm = require('../common/fcm');
 const scraper = require('../common/scraper');
 
 config.requireKeys('data.js', {
@@ -71,7 +71,7 @@ function pushPin(stories, index) {
   const TOPIC = 'headlines';
   timelinejs.insertSharedPin(pin, [ TOPIC ], config.ENV.API_KEY_PROD, log.info);
   timelinejs.insertSharedPin(pin, [ TOPIC ], config.ENV.API_KEY_SANDBOX, log.info); 
-  plural.post('news_headlines__latest', `${pin.layout.title} - ${pin.layout.body}`);
+  fcm.post('News Headlines', 'news_headlines__latest', `${pin.layout.title} - ${pin.layout.body}`);
 }
 
 function download() {
