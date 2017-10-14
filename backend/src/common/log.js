@@ -5,65 +5,64 @@ const config = require('./config');
 config.requireKeys('log.js', {
   LOG: {
     APP_NAME: '',
-    LOG_NAME: 'app.log',
     LEVEL: 'info',
     TO_FILE: true
   }
 });
 
-function getAppName() {
-  return `[${config.LOG.APP_NAME}]`;
-}
+function getAppName() { return `[${config.LOG.APP_NAME}]`; }
 
 function getTimeString() {
   const str = new Date().toISOString();
   return `[${str.substring(0, str.indexOf('.')).replace('T', ' ')}]`;
 }
 
-function setPid() {
-  const path = `${config.getInstallPath()}/pid`;
-  fs.writeFileSync(path, process.pid, 'utf8');
+function writePid() { fs.writeFileSync(`${config.getInstallPath()}/pid`, process.pid, 'utf8'); }
+
+function makeLogName() { return config.LOG.APP_NAME.split(' ').join('-'); }
+
+function writeToFile(msg) {
+  const filePath = `${config.getInstallPath()}/${makeLogName()}.log`;
+  let stream;
+  if(!fs.existsSync(filePath)) {
+    stream = fs.createWriteStream(filePath, {'flags': 'w'});  
+    stream.end(`${getTimeString()} New log file!\n`);
+  }
+
+  stream = fs.createWriteStream(filePath, {'flags': 'a'});
+  stream.end(`${msg}\n`);
 }
 
-function log(msg) {
-  if(typeof msg === 'object') {
-    if(msg.message) msg = msg.message;
-    else msg = JSON.stringify(msg);
-  }
-  msg = `${getAppName()} ${getTimeString()} ${msg}`;
+function willLog(level, msg) {
+  return config.LOG.LEVEL.includes(level) ||
+         level === 'verbose' ||
+         level === 'error' ||
+         level === 'fatal';
+}
+
+function getTag(level) {
+  return {
+    info: '[I]',
+    debug: '[D]',
+    error: '[E]',
+    verbose: '[V]',
+    fatal: '[F]'
+  }[level];
+}
+
+function convertObject(msg) { return msg.message ? msg.message : JSON.stringify(msg); }
+
+function log(level, msg) {
+  if(!willLog(level, msg)) return;
+
+  if(typeof msg === 'object') msg = convertObject(msg);
+
+  msg = `${getTag(level)} ${getAppName()} ${getTimeString()} ${msg}`;
   console.log(msg);
 
-  if(config.LOG.TO_FILE) {
-    const filePath = `${config.getInstallPath()}/${config.LOG.LOG_NAME}`;
-    var stream;
-    if(!fs.existsSync(filePath)) {
-      stream = fs.createWriteStream(filePath, {'flags': 'w'});  
-      stream.end(`${getTimeString()} New log file!\n`);
-    }
-    stream = fs.createWriteStream(filePath, {'flags': 'a'});
-    stream.end(`${msg}\n`);
-  }
-}
+  if(config.LOG.TO_FILE) writeToFile(msg);
 
-function info(msg) {
-  if(config.LOG.LEVEL.includes('info')) log(`[I] ${msg}`);
-}
-
-function debug(msg) {
-  if(config.LOG.LEVEL.includes('debug')) log(`[D] ${msg}`);
-}
-
-function verbose(msg) {
-  log(`[V] ${msg}`);
-}
-
-function error(msg) {
-  log(`[E] ${msg}`);
-}
-
-function fatal(msg) {
-  log(`[F] ${msg}`);
-  process.exit(1);
+  if(level === 'fatal') process.exit(1);
 }
 
 function assert(condition, msg, strict) {
@@ -72,11 +71,13 @@ function assert(condition, msg, strict) {
     var func = strict ? fatal : error;
     func(msg);
   }
+
+  return condition;
 }
 
 function begin() {
-  verbose(`===== ${getAppName()} =====`);
-  setPid();
+  info(`===== ${getAppName()} =====`);
+  writePid();
   process.on('uncaughtException', (err) => {
     error('uncaughtException:');
     error(err.stack);
@@ -89,12 +90,18 @@ function begin() {
   });
 }
 
+const info = (msg) => log('info', msg);
+const debug = (msg) => log('debug', msg);
+const error = (msg) => log('error', msg);
+const verbose = (msg) => log('verbose', msg);
+const fatal = (msg) => log('fatal', msg);
+
 module.exports = {
   begin: begin,
-  info: info,
-  debug: debug,
-  error: error,
-  verbose: verbose,
-  fatal: fatal,
+  info: (msg) => log('info', msg),
+  debug: (msg) => log('debug', msg),
+  error: (msg) => log('error', msg),
+  verbose: (msg) => log('verbose', msg),
+  fatal: (msg) => log('fatal', msg),
   assert: assert
 };

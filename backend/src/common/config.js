@@ -2,26 +2,11 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+const compare = require('./compare');
+
 const CONFIG_PATH = `${__dirname}/../../config.json`;
 
 var config = {};
-
-function compareObject(context, parentKey, spec, query, exit) {
-  var error = false;
-  for(var key in spec) {
-    const value = spec[key];
-    if(query.hasOwnProperty(key)) {
-      if(typeof value === 'object' && !Array.isArray(value)) {
-        compareObject(context, key, value, query[key], true);
-      }
-    } else {
-      console.log(`${context}: key '${key}' not found in ${parentKey}`);
-      error = true;
-    }
-  }
-  if(error && exit) process.exit();
-  else return !error;
-}
 
 (() => {
   if(!fs.existsSync(CONFIG_PATH)) {
@@ -29,15 +14,13 @@ function compareObject(context, parentKey, spec, query, exit) {
     console.log('Set up empty config.json');
     return;
   }
-  console.log('config.json loaded');
   config = require(CONFIG_PATH);
+  console.log('config.json loaded');
 })();
-
-config.compareObject = compareObject;
 
 // Allow modules to require certain keys in config.json
 config.requireKeys = (moduleName, moduleSpec) => {
-  compareObject(`Module ${moduleName}`, 'root', moduleSpec, config, true);
+  compare(`Module ${moduleName}`, 'root', moduleSpec, config, true);
 };
 
 config.getInstallPath = () => execSync('pwd').toString().trim();
