@@ -1,6 +1,6 @@
-const config = require('./common/config');
+const config = require('./node-common').config();
 const data = require('./modules/data');
-const log = require('./common/log');
+const log = require('./node-common').log();
 const api = require('./modules/api');
 
 config.requireKeys('main.js', {
