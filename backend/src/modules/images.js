@@ -89,6 +89,4 @@ function handleImageRequest(req, res) {
   // });
 }
 
-module.exports = {
-  handleImageRequest: handleImageRequest
-};
+module.exports = { handleImageRequest };

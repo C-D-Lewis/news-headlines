@@ -2,10 +2,10 @@ const request = require('request');
 const moment = require('moment-timezone');
 const timelinejs = require('pebble-timeline-js-node');
 
-const config = require('../common/config');
-const log = require('../common/log');
-const fcm = require('../common/fcm');
-const scraper = require('../common/scraper');
+const config = require('../node-common').config();
+const log = require('../node-common').log();
+const fcm = require('../node-common').fcm();
+const extract = require('../node-common').extract();
 
 config.requireKeys('data.js', {
   ENV: {
@@ -32,9 +32,9 @@ function getStories(xml) {
   xml.shift();
   xml.map((xmlChunk) => {
     const story = {
-      title: decode(scraper.scrape(xmlChunk, [ '<title>' ], '</title>')),
-      description: decode(scraper.scrape(xmlChunk, [ '<description>' ], '</description>')),
-      date: scraper.scrape(xmlChunk, [ '<pubDate>' ], '</pubDate>')
+      title: decode(extract(xmlChunk, [ '<title>' ], '</title>')),
+      description: decode(extract(xmlChunk, [ '<description>' ], '</description>')),
+      date: extract(xmlChunk, [ '<pubDate>' ], '</pubDate>')
     };
 
     if(!dupeBuffer.find((dupe) => dupe.title === story.title)) {
@@ -79,15 +79,15 @@ function download() {
     if(cacheFirst) {
       log.info('Caching on first run');
       cacheFirst = false;
-    } else {
-      const stories = getStories(body);
-      if(stories.length < 1) return;
-
-      for(var i = 0; i < MAX_PUSHED; i++) pushPin(stories, i);
+      return;
     }
+
+    const stories = getStories(body);
+    if(stories.length < 1) return;
+
+    for(var i = 0; i < MAX_PUSHED; i++) pushPin(stories, i);
+  }
   });
 };
 
-module.exports = {
-  download: download
-};
+module.exports = { download };
