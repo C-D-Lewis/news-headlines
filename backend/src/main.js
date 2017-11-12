@@ -1,7 +1,7 @@
 const config = require('./node-common').config();
 const data = require('./modules/data');
 const log = require('./node-common').log();
-const api = require('./modules/api');
+const mbus = require('./node-common').mbus();
 
 config.requireKeys('main.js', {
   ENV: {
@@ -9,9 +9,10 @@ config.requireKeys('main.js', {
   }
 });
 
-(() => {
+(async () => {
   log.begin();
-  api.setup();
+  
+  await mbus.register();
 
   setInterval(data.download, config.ENV.UPDATE_INTERVAL_M * 1000 * 60);
   data.download();
