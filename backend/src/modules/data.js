@@ -86,7 +86,6 @@ function download() {
     if(stories.length < 1) return;
 
     for(var i = 0; i < MAX_PUSHED; i++) pushPin(stories, i);
-  }
   });
 };
 
